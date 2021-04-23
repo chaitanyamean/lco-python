@@ -7,12 +7,13 @@ import { signin, authenticate, isAuthenticated } from "../auth/helper";
 const Signin = () => {
   const [values, setValues] = useState({
     name: "",
-    email: "demo@vigneshshetty.in",
-    password: "demo",
+    email: "nine@rtro.com",
+    password: "111111",
     error: "",
     success: false,
     loading: false,
     didRedirect: false,
+    errorMessage: ''
   });
   const {
     name,
@@ -28,7 +29,7 @@ const Signin = () => {
     setValues({ ...values, error: false, [name]: event.target.value });
   };
 
-  const onSumit = (event) => {
+  const onSubmit = (event) => {
     event.preventDefault();
     setValues({ ...values, error: false, loading: true });
 
@@ -42,9 +43,19 @@ const Signin = () => {
             setValues({
               ...values,
               didRedirect: true,
+              success: true
             });
           });
-        } else {
+        } else if(data.Error) {
+            console.log(data);
+            setValues({
+                ...values,
+                error: true,
+                success: false,
+                errorMessage: data.Error
+            })
+        } 
+        else {
           setValues({
             ...values,
             loading: false,
@@ -55,6 +66,7 @@ const Signin = () => {
   };
 
   const performRedirect = () => {
+      console.log('isAuthenticated',isAuthenticated())
     if (isAuthenticated()) {
       return <Redirect to="/" />;
     }
@@ -94,7 +106,7 @@ const Signin = () => {
             className="alert alert-danger"
             style={{ display: error ? "" : "none" }}
           >
-            Check all fields again
+            {values.errorMessage}
           </div>
         </div>
       </div>
@@ -126,7 +138,7 @@ const Signin = () => {
                 type="password"
               />
             </div>
-            <button onClick={onSumit} className="btn btn-success btn-block">
+            <button onClick={onSubmit} className="btn btn-success btn-block">
               Submit
             </button>
           </form>
@@ -138,7 +150,7 @@ const Signin = () => {
   return (
     <Base title="Welcome to sign in page" description="A tshirt store">
       {loadingMessage()}
-
+      {errorMessage()}
       {signInForm()}
       <p className="text-center">{JSON.stringify(values)}</p>
       {performRedirect()}
