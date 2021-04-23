@@ -16,7 +16,7 @@ def generate_session_token(length=10):
 @csrf_exempt
 def signin(request):
     if not request.method == 'POST':
-        return JsonResponse({'error': 'Send a post request'})
+        return JsonResponse({'Error': 'Send a post request'})
     
     username = request.POST['email']
     password = request.POST['password']
@@ -40,7 +40,7 @@ def signin(request):
             if user.session_token != "0":
                 user.session_token = '0'
                 user.save()
-                return JsonResponse({"error": 'Previous session exists'})
+                return JsonResponse({"Error": 'Previous session exists'})
             
             token = generate_session_token()
             user.session_token = token
@@ -68,6 +68,24 @@ def signout(request, id):
 
     return JsonResponse({'Success': 'Logged out successful'})
 
+def getUserSessionId(request,id):
+    # print(id, request)
+
+    UserModel = get_user_model()
+
+    try:
+        user = UserModel.objects.filter(pk=id).values().first()
+        print('UserModel', user)
+        user.pop('password')
+
+        # serializer = self.get_serializer(user) 
+        # print(serializer)                                                                                                                                                                                                                                                                                                                                                   
+
+        return JsonResponse({'token': user})
+    except UserModel.DoesNotExist:
+        return JsonResponse({'Error': 'Error while fetching session'})
+
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes_by_action = {'create': [AllowAny]}
 
@@ -79,3 +97,5 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permission() for permission in self.permission_classes_by_action[self.action]]
         except KeyError:
             return [permission() for permission in self.permission_classes]
+
+
